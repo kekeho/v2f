@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Hiroki Takemura (kekeho)
-# 
+#
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
@@ -28,6 +28,7 @@ Options:
     -h, --help                        Show this help
 """
 
+
 def main():
     args = docopt(DOC)
 
@@ -35,10 +36,8 @@ def main():
     interval = int(args['--interval']) if args['--interval'] else 1
     fps_info = float(args['--fps']) if args['--fps'] else None
 
-    frames = split.split(filename, interval, fps_info)
-    list(map(split.save_frame, frames))
+    split.split(filename, interval, fps_info)
 
 
 if __name__ == '__main__':
     main()
-

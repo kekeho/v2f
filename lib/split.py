@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Hiroki Takemura (kekeho)
-# 
+#
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
@@ -19,13 +19,34 @@ class Frame(object):
         self.video_filename = video_filename
         self.time: datetime.datetime = time
 
+    def save(self):
+        dirname = os.path.dirname(self.video_filename)
+        filename, file_ext = os.path.splitext(
+            os.path.basename(self.video_filename))
+        frame_filename = f'{filename}-{self.frame_index}.jpg'
 
-def split(filename: str, interval=1, fps_info: float = None) -> List[Frame]:
+        savedir = os.path.join(dirname, filename)
+        try:
+            os.mkdir(savedir)
+        except FileExistsError:
+            pass
+
+        cv2.imwrite(os.path.join(savedir, frame_filename), self.frame)
+        os.utime(os.path.join(savedir, frame_filename),
+                 (self.time.timestamp(), self.time.timestamp()))
+
+
+def split(filename: str, interval=1, fps_info: float = None) -> None:
+    """ Split video & save frames
+    Args:
+        filename: video filename
+        interval: get frames per interval
+        fps_info: give fps info (none: get from file header)
+    """
+
     capture_stream = cv2.VideoCapture(filename)
     video_mtime = datetime.datetime.fromtimestamp(os.stat(filename).st_mtime)
     video_fps = fps_info if fps_info else capture_stream.get(cv2.CAP_PROP_FPS)
-
-    print(video_fps)
 
     if not capture_stream.isOpened():
         return np.ndarray([])
@@ -41,25 +62,8 @@ def split(filename: str, interval=1, fps_info: float = None) -> List[Frame]:
         if frame_index % interval == 0:
             timedelta = datetime.timedelta(seconds=frame_index / video_fps)
             f = Frame(frame, frame_index, filename, video_mtime + timedelta)
-            buffer.append(f)
-        
+            f.save()
+
         frame_index += 1
-    
+
     return buffer
-
-
-def save_frame(frame: Frame) -> None:
-    dirname = os.path.dirname(frame.video_filename)
-    filename, file_ext = os.path.splitext(os.path.basename(frame.video_filename))
-    frame_filename = f'{filename}-{frame.frame_index}.jpg'
-
-    savedir = os.path.join(dirname, filename)
-    try:
-        os.mkdir(savedir)
-    except FileExistsError:
-        pass
-
-    print(frame.time)
-
-    cv2.imwrite(os.path.join(savedir, frame_filename), frame.frame)
-    os.utime(os.path.join(savedir, frame_filename), (frame.time.timestamp(), frame.time.timestamp()))
