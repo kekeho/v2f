@@ -63,6 +63,7 @@ def split(filename: str, interval=1, fps_info: float = None) -> None:
             timedelta = datetime.timedelta(seconds=frame_index / video_fps)
             f = Frame(frame, frame_index, filename, video_mtime + timedelta)
             f.save()
+            del f
 
         frame_index += 1
 
