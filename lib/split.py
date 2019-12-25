@@ -65,6 +65,7 @@ def split(filename: str, interval=1, fps_info: float = None) -> None:
             f.save()
             del f
 
+        del frame
         frame_index += 1
 
     return buffer
